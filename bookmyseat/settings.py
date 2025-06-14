@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-c8aetlj(=vp90n@#yoc^&d(_6ivp(d!bv-4-f!r$lawptjzrwu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app']
+ALLOWED_HOSTS = ['.vercel.app','*']
 
 
 # Application definition
@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-DATABASES['default'] = dj_database_url.parse('postgresql://bookmyshow_m4ic_user:bZrV0KVpxa6awZ7VMfNlYWyYk05cLa58@dpg-d14kc8c9c44c7387rb1g-a.oregon-postgres.render.com/bookmyshow_m4ic')
+DATABASES['default'] = dj_database_url.parse('postgresql://djnago_user:zNiYQKyVPZLZx3DToja0WtDXFl8rTczF@dpg-d16mddmmcj7s73capoh0-a.oregon-postgres.render.com/djnago')
 # 
 
 # Password validation
