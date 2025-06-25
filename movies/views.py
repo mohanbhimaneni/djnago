@@ -2,14 +2,29 @@ from django.shortcuts import render, redirect ,get_object_or_404
 from .models import Movie,Theater,Seat,Booking
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def movie_list(request):
-    search_query=request.GET.get('search')
+    search_query = request.GET.get('search', '')
+    movies = Movie.objects.all().order_by('name')
     if search_query:
-        movies=Movie.objects.filter(name__icontains=search_query)
-    else:
-        movies=Movie.objects.all()
-    return render(request,'movies/movie_list.html',{'movies':movies})
+        movies = movies.filter(name__icontains=search_query)
+    movies_per_page = 3
+    paginator = Paginator(movies, movies_per_page)
+    page_number = request.GET.get('page')
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.get_page(1)
+    except EmptyPage:
+        page_obj = paginator.get_page(paginator.num_pages)
+    context = {
+        'movies': page_obj,
+        'page_obj': page_obj,
+        'is_paginated': True,
+        'search_query': search_query,
+    }
+    return render(request, 'movies/movie_list.html', context)
 
 def theater_list(request,movie_id):
     movie = get_object_or_404(Movie,id=movie_id)
