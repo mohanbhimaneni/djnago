@@ -42,7 +42,7 @@
             {% csrf_token %}
             <div class="d-flex justify-content-center flex-wrap mb-4">
               {% for seat in seats %}
-              <div class="seat {% if seat.is_booked %}sold{% endif %}">
+              <div class="seat available {% if seat.is_booked %}sold{% endif %}">
                 {% if not seat.is_booked %}
                 <input
                   type="checkbox"
