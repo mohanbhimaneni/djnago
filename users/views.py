@@ -4,6 +4,7 @@ from django.shortcuts import render,redirect
 from django.contrib.auth import login,authenticate
 from django.contrib.auth.decorators import login_required
 from movies.models import Movie , Booking
+from django.utils import timezone
 
 def home(request):
     movies = Movie.objects.all()
@@ -35,7 +36,13 @@ def login_view(request):
 
 @login_required
 def profile(request):
-    bookings= Booking.objects.filter(user=request.user)
+    # Get all bookings for the user, order by booking date descending
+    all_bookings = Booking.objects.filter(user=request.user).select_related('movie', 'theater', 'seat').order_by('-booked_at')
+    now = timezone.now()
+    # Upcoming: theater time is in the future
+    upcoming_bookings = all_bookings.filter(theater__time__gte=now)
+    # Past: theater time is in the past
+    past_bookings = all_bookings.filter(theater__time__lt=now)
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
         if u_form.is_valid():
@@ -44,7 +51,16 @@ def profile(request):
     else:
         u_form = UserUpdateForm(instance=request.user)
 
-    return render(request, 'users/profile.html', {'u_form': u_form,'bookings':bookings})
+    return render(
+        request,
+        'users/profile.html',
+        {
+            'u_form': u_form,
+            'bookings': all_bookings,  # for backward compatibility
+            'upcoming_bookings': upcoming_bookings,
+            'past_bookings': past_bookings,
+        }
+    )
 
 @login_required
 def reset_password(request):

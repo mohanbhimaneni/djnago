@@ -46,23 +46,23 @@
         </div>
       </div>
       
-      <!-- Bookings Card -->
-      <div class="card shadow">
+      <!-- Upcoming Bookings Card -->
+      <div class="card shadow mb-4">
         <div class="card-header bg-success text-white">
-          <h4 class="mb-0"><i class="fas fa-ticket-alt me-2"> </i> Your Bookings</h4>
+          <h4 class="mb-0"><i class="fas fa-calendar-alt me-2"></i> Upcoming Bookings</h4>
         </div>
         <div class="card-body">
-          {% if bookings %}
+          {% if upcoming_bookings %}
             <div class="row row-cols-1 row-cols-md-2 g-4">
-              {% for booking in bookings %}
+              {% for booking in upcoming_bookings %}
                 <div class="col">
                   <div class="card h-100 border-0 shadow-sm">
                     <div class="card-body">
                       <h5 class="card-title">{{ booking.movie.name }}</h5>
                       <p class="card-text">
-                        <i class="fas fa-film me-2 text-muted"> </i>  {{ booking.theater.name }}<br>
-                        <i class="fas fa-chair me-2 text-muted"> </i>  Seat: {{ booking.seat.seat_number }}<br>
-                        <i class="far fa-clock me-2 text-muted"> </i>  {{ booking.booked_at|date:"F d, Y H:i" }}
+                        <i class="fas fa-film me-2 text-muted"></i> {{ booking.theater.name }}<br>
+                        <i class="fas fa-chair me-2 text-muted"></i> Seat: {{ booking.seat.seat_number }}<br>
+                        <i class="far fa-clock me-2 text-muted"></i> {{ booking.theater.time|date:"F d, Y H:i" }}
                       </p>
                     </div>
                   </div>
@@ -70,9 +70,41 @@
               {% endfor %}
             </div>
           {% else %}
-            <div class="text-center py-5">
-              <i class="fas fa-ticket-alt fa-4x text-muted mb-3"></i>
-              <p class="lead mb-0">No bookings yet. Time to plan your next movie night!</p>
+            <div class="text-center py-4">
+              <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+              <p class="lead mb-0">No upcoming bookings.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Past Bookings Card -->
+      <div class="card shadow">
+        <div class="card-header bg-secondary text-white">
+          <h4 class="mb-0"><i class="fas fa-history me-2"></i> Past Bookings</h4>
+        </div>
+        <div class="card-body">
+          {% if past_bookings %}
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+              {% for booking in past_bookings %}
+                <div class="col">
+                  <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ booking.movie.name }}</h5>
+                      <p class="card-text">
+                        <i class="fas fa-film me-2 text-muted"></i> {{ booking.theater.name }}<br>
+                        <i class="fas fa-chair me-2 text-muted"></i> Seat: {{ booking.seat.seat_number }}<br>
+                        <i class="far fa-clock me-2 text-muted"></i> {{ booking.theater.time|date:"F d, Y H:i" }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-4">
+              <i class="fas fa-history fa-3x text-muted mb-3"></i>
+              <p class="lead mb-0">No past bookings.</p>
             </div>
           {% endif %}
         </div>
@@ -127,31 +159,4 @@
     }
   }
 </style>
-<!-- <div class="container mt-4">
-    <h2>Profile</h2>
-    <form method="POST">
-      {% csrf_token %}
-      {{ u_form.as_p }}
-      <div>
-        <button class="btn btn-primary mt-2" type="submit">Update Profile</button>
-      </div>
-    </form>
-   
-    <p>Want to change your password? <a href="{% url 'password_reset' %}">Reset it here</a>.</p>
-
-    <h2>Booking</h2>
-    <ul>
-      {% for booking in bookings %}
-      <li>
-        movie:{{booking.movie.name}}<br>
-        theater:{{booking.theater.name}}<br>
-        seat:{{booking.seat.seat_number}}<br>
-        bookedat:{{booking.booked_at}}
-
-      </li>
-      {% empty %}
-      <li>no bookings yet</li>
-      {% endfor %}
-    </ul>
-  </div> -->
 {% endblock %}
