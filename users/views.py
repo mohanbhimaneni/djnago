@@ -43,6 +43,27 @@ def profile(request):
     upcoming_bookings = all_bookings.filter(theater__time__gte=now)
     # Past: theater time is in the past
     past_bookings = all_bookings.filter(theater__time__lt=now)
+
+    # Recommendation logic
+    booked_movie_ids = all_bookings.values_list('movie_id', flat=True)
+    booked_movies = Movie.objects.filter(id__in=booked_movie_ids)
+    # Get cast keywords from user's booked movies
+    cast_keywords = []
+    for movie in booked_movies:
+        cast_keywords.extend([c.strip() for c in movie.cast.split(',')])
+    # Recommend movies with similar cast or not yet booked
+    if cast_keywords:
+        recommended_movies = Movie.objects.exclude(id__in=booked_movie_ids).filter(
+            cast__icontains=cast_keywords[0]
+        )[:4]
+        # If not enough, fill with other movies not yet booked
+        if recommended_movies.count() < 4:
+            extra_movies = Movie.objects.exclude(id__in=booked_movie_ids).exclude(id__in=recommended_movies.values_list('id', flat=True))[:4-recommended_movies.count()]
+            recommended_movies = list(recommended_movies) + list(extra_movies)
+    else:
+        # If no history, recommend top-rated or recent movies
+        recommended_movies = Movie.objects.all().order_by('-rating')[:4]
+
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
         if u_form.is_valid():
@@ -59,6 +80,7 @@ def profile(request):
             'bookings': all_bookings,  # for backward compatibility
             'upcoming_bookings': upcoming_bookings,
             'past_bookings': past_bookings,
+            'recommended_movies': recommended_movies,
         }
     )
 
