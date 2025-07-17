@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User 
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 
 
 class Movie(models.Model):
@@ -36,3 +38,20 @@ class Booking(models.Model):
     booked_at=models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f'Booking by{self.user.username} for {self.seat.seat_number} at {self.theater.name}'
+
+@receiver(post_save, sender=Booking)
+def mark_seat_booked(sender, instance, created, **kwargs):
+    # Mark seat as booked when a booking is created
+    if created:
+        seat = instance.seat
+        if not seat.is_booked:
+            seat.is_booked = True
+            seat.save(update_fields=['is_booked'])
+
+@receiver(post_delete, sender=Booking)
+def mark_seat_unbooked(sender, instance, **kwargs):
+    # Mark seat as unbooked when a booking is deleted
+    seat = instance.seat
+    if seat.is_booked:
+        seat.is_booked = False
+        seat.save(update_fields=['is_booked'])
