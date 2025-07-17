@@ -18,17 +18,39 @@ class Theater(models.Model):
     name = models.CharField(max_length=255)
     movie = models.ForeignKey(Movie,on_delete=models.CASCADE,related_name='theaters')
     time= models.DateTimeField()
+    base_price = models.DecimalField(max_digits=7, decimal_places=2, default=200.00)  # Default base price
 
     def __str__(self):
         return f'{self.name} - {self.movie.name} at {self.time}'
+
+    def get_dynamic_price(self):
+        import math
+        from django.utils import timezone
+        total_seats = self.seats.count()
+        booked_seats = self.seats.filter(is_booked=True).count()
+        remaining_seats = total_seats - booked_seats
+        base_price = float(self.base_price)
+        # Demand factor: fewer seats, higher price
+        demand_factor = 1 + (1 - remaining_seats / total_seats) * 0.5 if total_seats > 0 else 1
+        # Time factor: closer to showtime, higher price
+        hours_to_show = (self.time - timezone.now()).total_seconds() / 3600
+        time_factor = 1 + max(0, (24 - hours_to_show) / 24) * 0.3  # If <24h, up to +30%
+        dynamic_price = base_price * demand_factor * time_factor
+        # Round to nearest 10 for ticketing
+        return math.ceil(dynamic_price / 10) * 10
 
 class Seat(models.Model):
     theater = models.ForeignKey(Theater,on_delete=models.CASCADE,related_name='seats')
     seat_number = models.CharField(max_length=10)
     is_booked=models.BooleanField(default=False)
+    price = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
 
     def __str__(self):
         return f'{self.seat_number} in {self.theater.name}'
+
+    def get_price(self):
+        # Always return the latest dynamic price
+        return self.theater.get_dynamic_price()
 
 class Booking(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
@@ -36,6 +58,8 @@ class Booking(models.Model):
     movie=models.ForeignKey(Movie,on_delete=models.CASCADE)
     theater=models.ForeignKey(Theater,on_delete=models.CASCADE)
     booked_at=models.DateTimeField(auto_now_add=True)
+    price = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
+
     def __str__(self):
         return f'Booking by{self.user.username} for {self.seat.seat_number} at {self.theater.name}'
 

@@ -37,11 +37,15 @@ def theater_list(request,movie_id):
 def book_seats(request,theater_id):
     theaters=get_object_or_404(Theater,id=theater_id)
     seats=Seat.objects.filter(theater=theaters)
+    # Set dynamic price for each seat before rendering
+    dynamic_price = theaters.get_dynamic_price()
+    for seat in seats:
+        seat.price = dynamic_price
     if request.method=='POST':
         selected_Seats= request.POST.getlist('seats')
         error_seats=[]
         if not selected_Seats:
-            return render(request,"movies/seat_selection.html",{'theater':theaters,"seats":seats,'error':"No seat selected"})
+            return render(request,"movies/seat_selection.html",{'theater':theaters,"seats":seats,'error':"No seat selected", 'dynamic_price': dynamic_price})
         for seat_id in selected_Seats:
             seat=get_object_or_404(Seat,id=seat_id,theater=theaters)
             if seat.is_booked:
@@ -52,17 +56,19 @@ def book_seats(request,theater_id):
                     user=request.user,
                     seat=seat,
                     movie=theaters.movie,
-                    theater=theaters
+                    theater=theaters,
+                    price=seat.get_price()
                 )
                 seat.is_booked=True
+                seat.price=seat.get_price()
                 seat.save()
             except IntegrityError:
                 error_seats.append(seat.seat_number)
         if error_seats:
             error_message=f"The following seats are already booked:{''.join(error_seats)}"
-            return render(request,'movies/seat_selection.html',{'theater':theaters,"seats":seats,'error':"No seat selected"})
+            return render(request,'movies/seat_selection.html',{'theater':theaters,"seats":seats,'error':"No seat selected", 'dynamic_price': dynamic_price})
         return redirect('profile')
-    return render(request,'movies/seat_selection.html',{'theaters':theaters,"seats":seats})
+    return render(request,'movies/seat_selection.html',{'theaters':theaters,"seats":seats, 'dynamic_price': dynamic_price})
 
 
 
