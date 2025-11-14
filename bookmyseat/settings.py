@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-DATABASES['default'] = dj_database_url.parse('postgresql://bookmyseat_s4ty_user:D2SoRhCWCpPsQK1XnWzCm4rYS4KxOULn@dpg-d4bipj7diees73ajvgcg-a.singapore-postgres.render.com/bookmyseat_s4ty')
+DATABASES['default'] = dj_database_url.parse('postgresql://bookmyseat_jn2s_user:dQsiVAvGihkWjXS91CzXzdpnvtRaKeH8@dpg-d4bj463e5dus73emchm0-a.oregon-postgres.render.com/bookmyseat_jn2s')
 # 
 
 # Password validation
